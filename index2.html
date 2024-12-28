@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Green Light Red Light Game</title>
+  <style>
+    body {
+      margin: 0;
+      overflow: hidden;
+      background: linear-gradient(to bottom, #87ceeb, #87ceeb 70%, #32a852);
+      font-family: Arial, sans-serif;
+    }
+
+    #game-container {
+      position: relative;
+      width: 100%;
+      height: 100vh;
+    }
+
+    .player {
+      width: 40px;
+      height: 40px;
+      background-color: red;
+      position: absolute;
+      bottom: 0;
+      transition: bottom 0.3s;
+    }
+
+    .doll {
+      position: absolute;
+      top: 20px;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 100px;
+      height: 150px;
+      background-color: yellow;
+      border-radius: 50%;
+      text-align: center;
+      line-height: 150px;
+      font-weight: bold;
+      color: black;
+      border: 2px solid black;
+    }
+
+    .finish-line {
+      position: absolute;
+      top: 10%;
+      left: 0;
+      width: 100%;
+      height: 10px;
+      background: black;
+    }
+
+    #tick-button {
+      position: absolute;
+      bottom: 20px;
+      left: 50%;
+      transform: translateX(-50%);
+      padding: 10px 20px;
+      font-size: 16px;
+      background-color: green;
+      color: white;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+    }
+
+    #tick-button:disabled {
+      background-color: gray;
+      cursor: not-allowed;
+    }
+  </style>
+</head>
+<body>
+  <div id="game-container">
+    <div class="doll" id="doll">HIDE</div>
+    <div class="finish-line"></div>
+    <div class="player" id="player-1" style="left: 10%;"></div>
+    <div class="player" id="player-2" style="left: 30%;"></div>
+    <div class="player" id="player-3" style="left: 50%;"></div>
+    <div class="player" id="player-4" style="left: 70%;"></div>
+    <div class="player" id="player-5" style="left: 85%;"></div>
+    <div id="tick-button">Move</div>
+  </div>
+
+  <script>
+    const players = document.querySelectorAll('.player');
+    const doll = document.getElementById('doll');
+    const tickButton = document.getElementById('tick-button');
+    const finishLine = document.querySelector('.finish-line');
+
+    let dollFacing = false;
+    let playersMoving = false;
+    let gameRunning = true;
+
+    function toggleDollFace() {
+      dollFacing = !dollFacing;
+      doll.textContent = dollFacing ? "WATCH" : "HIDE";
+      doll.style.backgroundColor = dollFacing ? "red" : "yellow";
+    }
+
+    function movePlayers() {
+      playersMoving = true;
+      players.forEach(player => {
+        const currentBottom = parseInt(getComputedStyle(player).bottom, 10);
+        player.style.bottom = `${currentBottom + 20}px`;
+      });
+    }
+
+    function stopPlayers() {
+      playersMoving = false;
+    }
+
+    function checkDisqualifications() {
+      if (dollFacing && playersMoving) {
+        alert("Disqualified! Moving while the doll is watching!");
+        gameRunning = false;
+        tickButton.disabled = true;
+      }
+    }
+
+    function checkWin() {
+      players.forEach(player => {
+        const playerBottom = parseInt(getComputedStyle(player).bottom, 10);
+        const finishLineTop = parseInt(getComputedStyle(finishLine).top, 10);
+        if (playerBottom >= finishLineTop - 40) {
+          alert("You win!");
+          gameRunning = false;
+          tickButton.disabled = true;
+        }
+      });
+    }
+
+    tickButton.addEventListener('click', () => {
+      if (!gameRunning) return;
+      if (!dollFacing) {
+        movePlayers();
+      } else {
+        stopPlayers();
+      }
+    });
+
+    setInterval(() => {
+      if (!gameRunning) return;
+      toggleDollFace();
+      checkDisqualifications();
+      checkWin();
+    }, 2000);
+  </script>
+</body>
+</html>
